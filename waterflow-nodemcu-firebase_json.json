@@ -1,0 +1,17 @@
+{
+	"backup"	: [{
+					"jumlah"	: "azisalvriyanto",
+					"pukul"		: true,
+					"tanggal"	: true
+				}],
+	"detail"	: [{
+					"jumlah"	: "azisalvriyanto",
+					"pukul"		: "azisalvriyanto",
+					"tanggal"	: "azisalvriyanto"
+				}],
+	"kecepatan"	: "azisalvriyanto",
+	"pukul"		: "azisalvriyanto",
+	"status"	: "azisalvriyanto",
+	"tanggal"	: "azisalvriyanto",
+	"total"		: "azisalvriyanto"
+}

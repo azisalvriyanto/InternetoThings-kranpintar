@@ -1,0 +1,42 @@
+function doGet(e) {
+	Logger.log(JSON.stringify(e));
+	var result = "OK";//Assume success
+	if (e.parameter == "undefined") {
+		result = " =[ NO PARAMETERS ]= ";
+	}
+	else {
+		var sheet_id	= "1L9FgySavOqcebQ2VQ-YD6ssez6FeHw-wlMFIObSRwf4";//Spreadsheet ID
+		var sheet_name	= "wudhu_log";//Sheet name
+		var sheet		= SpreadsheetApp.openById(sheet_id).getSheetByName(sheet_name);
+
+		var newRow		= sheet.getLastRow() + 1;
+		var rowData		= [];
+		rowData[0]		= new Date() + "";
+		result			= rowData[0] + " | ";
+		for (var param in e.parameter) {
+			Logger.log("In for loop, param=" + param);
+			var value = stripQuotes(e.parameter[param]);
+			Logger.log(param + ":" + e.parameter[param]);
+			switch (param) {
+					case "jumlah"://Parameter
+						rowData[1]	= value;//Value in column "Jumlah" (L)
+						result	   += "Written on column \"jumlah\" = " + rowData[1];
+						break;
+					default:
+						result = " =[ UNSUPPORTED PARAMETER ]= ";
+			}
+		}
+
+		Logger.log(JSON.stringify(rowData));
+		var newRange = sheet.getRange(newRow, 1, 1, rowData.length);
+		newRange.setValues([rowData]);
+
+		return ContentService.createTextOutput(result);		
+	}
+		
+}
+
+
+function stripQuotes( value ) {
+	return value.replace(/^["']|['"]$/g, "");
+}

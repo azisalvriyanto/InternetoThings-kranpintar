@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wudhu Online</title>
+	<script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
+	<script>
+		// Initialize Firebase
+		var config = {
+			apiKey				: "AIzaSyAzeUQKg4XDpM669LelM8nvOIvGA6gcpc0",
+			authDomain			: "wudhu-4fa44.firebaseapp.com",
+			databaseURL			: "https://wudhu-4fa44.firebaseio.com",
+			projectId			: "wudhu-4fa44",
+			storageBucket		: "wudhu-4fa44.appspot.com",
+			messagingSenderId	: "671971706033"
+		};
+
+		firebase.initializeApp(config);
+	</script>
+</head>
+<body>
+	<div>
+		Update terakhir : <span id="waktu">-</span>
+	</div>
+	<div>
+		Kecepatan : <span id="kecepatan">-</span>
+	</div>
+	<div>
+		Total : <span id="total">-</span>
+	</div>
+	<div>
+		Status : <span id="status">-</span>
+	</div>
+	<div>
+		<input type="button" value="RESET" onclick="reset();"/>
+	</div>
+	<div>
+		detail
+	</div>
+	<table id="table_detail" border="1">
+		<tr>
+			<td>Nomor</td>
+			<td>Tanggal</td>
+			<td>Waktu</td>
+			<td>Jumlah</td>
+		</tr>
+	</table>
+	<div>
+		backup
+	</div>
+	<table id="table_backup" border="1">
+		<tr>
+			<td>Nomor</td>
+			<td>Tanggal</td>
+			<td>Waktu</td>
+			<td>Jumlah</td>
+			<td>Action</td>
+		</tr>
+	</table>
+
+
+	<script type="text/javascript">
+		var f_database		= firebase.database();
+
+
+		//value biasa
+		f_database.ref().on("value", function(snapshot) {
+			var waktu		= snapshot.child("pukul").val();
+			var tanggal		= snapshot.child("tanggal").val();
+			var kecepatan	= snapshot.child("kecepatan").val();
+			var total		= snapshot.child("total").val();
+			var status		= snapshot.child("status").val();
+
+			if (status == "reset") {
+				status = "Data sedang direset.";
+			}
+
+			document.getElementById("waktu")		.innerHTML	= waktu+" WIB"+" | "+tanggal+" (GMT+7)";
+			document.getElementById("kecepatan")	.innerHTML	= kecepatan+" mL/S";
+			document.getElementById("total")		.innerHTML	= total+" mL";
+			document.getElementById("status")		.innerHTML	= status;
+		});
+
+
+		//table detail
+		var detail_rowIndex = 1;
+		var detail_table 	= document.getElementById("table_detail");
+		var detail_ref 		= f_database.ref("detail");
+		detail_ref.once("value", function(snapshot) {
+			snapshot.forEach(function(childSnapshot) {
+				var detail	= childSnapshot.val();
+
+				var row				= detail_table.insertRow(detail_rowIndex);
+				var detail_nomor	= row.insertCell(0);
+				var detail_tanggal	= row.insertCell(1);
+				var detail_waktu	= row.insertCell(2);
+				var detail_jumlah	= row.insertCell(3);
+
+				detail_nomor	.appendChild(document.createTextNode(detail_rowIndex));
+				detail_tanggal	.appendChild(document.createTextNode(detail.tanggal));
+				detail_waktu	.appendChild(document.createTextNode(detail.pukul));
+				detail_jumlah	.appendChild(document.createTextNode(detail.jumlah));
+
+				detail_rowIndex = detail_rowIndex + 1;
+			});
+		});
+
+
+		//table backup
+		var backup_rowIndex	= 1;
+		var backup_table	= document.getElementById("table_backup");
+		var backup_ref		= f_database.ref("backup");
+
+		backup_ref.once("value", function(snapshot) {
+			snapshot.forEach(function(childSnapshot) {
+				var backup	= childSnapshot.val();
+
+				var row				= backup_table.insertRow(backup_rowIndex);
+				var backup_nomor	= row.insertCell(0);
+				var backup_tanggal	= row.insertCell(1);
+				var backup_waktu	= row.insertCell(2);
+				var backup_jumlah	= row.insertCell(3);
+				var backup_delete	= row.insertCell(4);
+
+				//membuat tombol input->hapus
+				var backup_hapus_input = document.createElement("input");
+				backup_hapus_input.setAttribute("type"		, "button");
+				backup_hapus_input.setAttribute("value"		, "hapus");
+				backup_hapus_input.setAttribute("onclick"	, "hapus("+childSnapshot.key+");");
+
+				backup_nomor	.appendChild(document.createTextNode(backup_rowIndex));
+				backup_tanggal	.appendChild(document.createTextNode(backup.tanggal));
+				backup_waktu	.appendChild(document.createTextNode(backup.pukul));
+				backup_jumlah	.appendChild(document.createTextNode(backup.jumlah));
+				backup_delete	.appendChild(backup_hapus_input);
+
+				backup_rowIndex = backup_rowIndex + 1;
+			});
+		});
+
+
+		function hapus(id) {
+			f_database.ref().child("/backup/" + id).remove();
+			alert("The user is deleted successfully!");
+
+			reloadpage();
+		}
+
+
+		function reset() {
+			f_database.ref("status").set("reset");
+			alert("The user is updated successfully!");
+
+			reloadpage();
+		}
+
+
+		function reloadpage(){
+			window.location.reload();
+		}
+	</script>
+</body>
+</html>
